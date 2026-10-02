@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Expense Tracker</title>
+<style>
+  * { box-sizing: border-box; font-family: Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: #f0f4fa; padding: 12px; }
+  h1 { font-size: 20px; margin: 0 0 12px; }
+  .panel { background: #fff; border: 1px solid #dde; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  h3 { font-size: 13px; text-transform: uppercase; color: #1e4a8b; margin: 0 0 10px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  label { font-size: 12px; font-weight: 600; color: #556; display: block; margin-bottom: 4px; }
+  input, select { height: 44px; font-size: 16px; font-weight: 600; border: 2px solid #dde;
+    border-radius: 10px; padding: 0 10px; width: 100%; background: #fff;
+    -webkit-appearance: none; appearance: none; }
+  input:focus, select:focus { outline: none; border-color: #1e4a8b; }
+  .limit { background: #1e4a8b; color: #fff; border-radius: 14px; padding: 18px;
+    margin-bottom: 12px; text-align: center; }
+  .limit small { font-size: 12px; text-transform: uppercase; opacity: .9; }
+  .limit b { display: block; font-size: 34px; margin: 6px 0; }
+  .limit span { font-size: 13px; }
+  .boxes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .box { flex: 1; min-width: 110px; background: #1e4a8b; color: #fff;
+    border-radius: 12px; padding: 10px 14px; }
+  .box small { display: block; font-size: 11px; opacity: .85; text-transform: uppercase; }
+  .box b { font-size: 18px; }
+  .wk { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 6px;
+    font-size: 11px; font-weight: 700; color: #889; text-align: center; }
+  .days { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+  .days button { height: 44px; min-height: 44px; border-radius: 8px; border: 2px solid #dde;
+    background: #fff; font-weight: 700; font-size: 15px; cursor: pointer;
+    -webkit-appearance: none; appearance: none; padding: 0; touch-action: manipulation; }
+  .days button.empty { visibility: hidden; border: none; }
+  .days button.on { background: #1e4a8b; color: #fff; border-color: #1e4a8b; }
+  .days button.has { background: #eef5ff; border-color: #93c5fd; color: #1e4a8b; }
+  .days button.on.has { background: #1e4a8b; color: #fff; }
+  .tot { background: #1e4a8b; color: #fff; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+  .tot small { font-size: 12px; text-transform: uppercase; opacity: .9; }
+  .tot b { display: block; font-size: 28px; margin: 4px 0; }
+  .tot span { font-size: 13px; }
+  .card { background: #fff; border: 1px solid #dde; border-radius: 14px;
+    padding: 14px; margin-bottom: 12px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; color: #667; margin: 0 0 10px; }
+  .flds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fld input { height: 46px; font-size: 16px; font-weight: 700; text-align: center; }
+  .btns { display: flex; gap: 8px; margin-top: 10px; }
+  .btns button { flex: 1; height: 46px; border-radius: 10px; border: 2px solid #dde;
+    background: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+    -webkit-appearance: none; appearance: none; }
+  .btns button.red { color: #c00; border-color: #fbb; }
+</style>
+</head>
+<body>
+
+<h1>💰 Expense & Budget Tracker</h1>
+
+<div class="panel">
+  <h3>📅 Month & Year</h3>
+  <div class="row">
+    <div><label>Month</label><select id="monthSel"></select></div>
+    <div><label>Year</label><select id="yearSel"></select></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h3>⚙️ Budget Setup</h3>
+  <div class="row">
+    <div><label>Monthly allowance</label><input type="number" inputmode="decimal" id="allowance" value="2500"></div>
+    <div><label>Save this month</label><input type="number" inputmode="decimal" id="savings" value="0"></div>
+    <div><label>Days in month</label><input type="number" id="daysCount" readonly></div>
+    <div><label>Currency</label>
+      <select id="currency">
+        <option value="¥">¥ Yuan</option><option value="$">$ USD</option>
+        <option value="€">€ Euro</option><option value="£">£ Pound</option>
+        <option value="RM">RM MYR</option><option value="₱">₱ PHP</option>
+        <option value="₹">₹ INR</option><option value="Rp">Rp IDR</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="limit">
+  <small>You can spend per day</small>
+  <b id="dailyLimit">¥0</b>
+  <span id="limitSub">—</span>
+</div>
+
+<div class="boxes">
+  <div class="box"><small>Month Spent</small><b id="mSpent">¥0</b></div>
+  <div class="box"><small>Remaining</small><b id="mLeft">¥0</b></div>
+  <div class="box"><small>Deposited</small><b id="mDep">¥0</b></div>
+</div>
+
+<div class="panel">
+  <h3>📅 Pick a day</h3>
+  <div class="wk" id="wkHeader"></div>
+  <div class="days" id="dayPicker"></div>
+</div>
+
+<div class="tot">
+  <small id="dayLabel">Day 1</small>
+  <b id="dayTotal">¥0</b>
+  <span id="dayLimit">—</span>
+</div>
+
+<div class="card">
+  <h2 id="foodTitle">🍽️ Food — ¥0</h2>
+  <div class="flds">
+    <div class="fld"><label>🌅 Breakfast</label><input type="number" inputmode="decimal" id="mb" placeholder="0"></div>
+    <div class="fld"><label>☀️ Lunch</label><input type="number" inputmode="decimal" id="ml" placeholder="0"></div>
+    <div class="fld"><label>🌙 Dinner</label><input type="number" inputmode="decimal" id="md" placeholder="0"></div>
+    <div class="fld"><label>🍿 Snacks</label><input type="number" inputmode="decimal" id="ms" placeholder="0"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2 id="spendTitle">💸 Spending — ¥0</h2>
+  <div class="flds">
+    <div class="fld"><label>🛒 Other</label><input type="number" inputmode="decimal" id="mo" placeholder="0"></div>
+    <div class="fld"><label>🚌 Transport</label><input type="number" inputmode="decimal" id="mt" placeholder="0"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2 id="depTitle">🏦 Deposit — ¥0</h2>
+  <div class="flds">
+    <div class="fld"><label>💵 Amount today</label><input type="number" inputmode="decimal" id="mp" placeholder="0"></div>
+  </div>
+</div>
+
+<div class="btns">
+  <button class="red" type="button" onclick="clearDay()">🧹 Clear Day</button>
+  <button type="button" onclick="clearAll()">🔄 Reset Month</button>
+</div>
+
+<script>
+var MONTHS = ['January','February','March','April','May','June',
+              'July','August','September','October','November','December'];
+var FIDS = {breakfast:'mb',lunch:'ml',dinner:'md',snacks:'ms',other:'mo',transport:'mt',deposit:'mp'};
+
+var cfg = {
+  allowance: 2500, savings: 0, currency: '¥',
+  year: new Date().getFullYear(),
+  month: new Date().getMonth()
+};
+var curDay = 1;
+var confirmPending = null;
+
+function $(id){ return document.getElementById(id); }
+function num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+function monthKey(){ return 'expV13_' + cfg.year + '-' + (cfg.month+1); }
+function load(){ try { return JSON.parse(localStorage.getItem(monthKey())) || {}; } catch(e){ return {}; } }
+function save(d){ try { localStorage.setItem(monthKey(), JSON.stringify(d)); } catch(e){} }
+function sym(){ return cfg.currency; }
+function fmt(v){
+  var s = num(v).toFixed(2).split('.');
+  s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return sym() + s[0] + ',' + s[1];
+}
+function dailyLimit(){
+  var spend = cfg.allowance - cfg.savings;
+  var d = daysInMonth(cfg.year, cfg.month);
+  return d > 0 ? spend / d : 0;
+}
+
+function buildMonthYear(){
+  var mh = '';
+  for (var i = 0; i < 12; i++) {
+    mh += '<option value="'+i+'"'+(i===cfg.month?' selected':'')+'>'+MONTHS[i]+'</option>';
+  }
+  $('monthSel').innerHTML = mh;
+  var nowY = new Date().getFullYear();
+  var yh = '';
+  for (var y = nowY-5; y <= nowY+3; y++) {
+    yh += '<option value="'+y+'"'+(y===cfg.year?' selected':'')+'>'+y+'</option>';
+  }
+  $('yearSel').innerHTML = yh;
+  $('monthSel').onchange = function(){ cfg.month = parseInt(this.value,10); switchMonth(); };
+  $('yearSel').onchange  = function(){ cfg.year  = parseInt(this.value,10); switchMonth(); };
+}
+
+function switchMonth(){
+  var now = new Date();
+  curDay = (now.getFullYear()===cfg.year && now.getMonth()===cfg.month) ? now.getDate() : 1;
+  var dim = daysInMonth(cfg.year, cfg.month);
+  if (curDay > dim) curDay = dim;
+  $('daysCount').value = dim;
+  buildDayPicker();
+  fillInputs();
+  updateAll();
+}
+
+function buildDayPicker(){
+  var first = new Date(cfg.year, cfg.month, 1).getDay();
+  var names = ['S','M','T','W','T','F','S'];
+  var wh = '';
+  for (var i = 0; i < 7; i++) wh += '<div>'+names[(first+i)%7]+'</div>';
+  $('wkHeader').innerHTML = wh;
+
+  var dim = daysInMonth(cfg.year, cfg.month);
+  var d = load();
+  var html = '';
+  for (var b = 0; b < first; b++) html += '<button type="button" class="empty" tabindex="-1"></button>';
+  for (var day = 1; day <= dim; day++) {
+    var rec = d[day] || {};
+    var tot = num(rec.breakfast)+num(rec.lunch)+num(rec.dinner)+num(rec.snacks)
+            + num(rec.other)+num(rec.transport);
+    var cls = (day===curDay?'on ':'') + (tot>0?'has':'');
+    html += '<button type="button" class="'+cls.trim()+'" data-day="'+day+'">'+day+'</button>';
+  }
+  $('dayPicker').innerHTML = html;
+}
+
+function fillInputs(){
+  var d = load();
+  var day = d[curDay] || {};
+  Object.keys(FIDS).forEach(function(f){
+    var el = $(FIDS[f]);
+    if (el) el.value = day[f] || '';
+  });
+}
+
+function updateAll(){
+  var d = load();
+  var day = d[curDay] || {};
+  var food  = num(day.breakfast)+num(day.lunch)+num(day.dinner)+num(day.snacks);
+  var spend = num(day.other)+num(day.transport);
+  var dep   = num(day.deposit);
+  var total = food + spend;
+  var limit = dailyLimit();
+
+  $('dayLabel').textContent = MONTHS[cfg.month] + ' ' + curDay;
+  $('dayTotal').textContent = fmt(total);
+  $('dayLimit').textContent = 'Limit ' + fmt(limit) + ' — ' +
+    (total > limit ? 'over ' + fmt(total-limit) : 'left ' + fmt(limit-total));
+
+  $('foodTitle').textContent  = '🍽️ Food — ' + fmt(food);
+  $('spendTitle').textContent = '💸 Spending — ' + fmt(spend);
+  $('depTitle').textContent   = '🏦 Deposit — ' + fmt(dep);
+
+  var mSpent = 0, mDep = 0;
+  var dim = daysInMonth(cfg.year, cfg.month);
+  for (var i = 1; i <= dim; i++) {
+    var r = d[i] || {};
+    mSpent += num(r.breakfast)+num(r.lunch)+num(r.dinner)+num(r.snacks)+num(r.other)+num(r.transport);
+    mDep   += num(r.deposit);
+  }
+  $('mSpent').textContent = fmt(mSpent);
+  $('mLeft').textContent  = fmt(cfg.allowance - mSpent);
+  $('mDep').textContent   = fmt(mDep);
+
+  $('dailyLimit').textContent = fmt(limit);
+  $('limitSub').textContent = 'Allowance ' + fmt(cfg.allowance) + ' · Save ' +
+    fmt(cfg.savings) + ' · ' + dim + ' days → ' + fmt(cfg.allowance - cfg.savings) + ' spendable';
+}
+
+function attachInputs(){
+  Object.keys(FIDS).forEach(function(field){
+    var el = $(FIDS[field]);
+    if (!el) return;
+    var handler = function(){
+      var d = load();
+      if (!d[curDay]) d[curDay] = {};
+      d[curDay][field] = num(this.value);
+      save(d);
+      buildDayPicker();
+      updateAll();
+    };
+    el.oninput  = handler;
+    el.onchange = handler;
+  });
+}
+
+function bindCfg(){
+  $('allowance').value = cfg.allowance;
+  $('savings').value = cfg.savings;
+  $('currency').value = cfg.currency;
+
+  $('allowance').oninput = function(){ cfg.allowance = num(this.value); updateAll(); };
+  $('savings').oninput   = function(){ cfg.savings   = num(this.value); updateAll(); };
+
+  var curSel = $('currency');
+  var applyCurrency = function(){
+    cfg.currency = curSel.value;
+    try { localStorage.setItem('expCurrency', cfg.currency); } catch(e){}
+    buildMonthYear();
+    buildDayPicker();
+    updateAll();
+  };
+  curSel.onchange = applyCurrency;
+  curSel.oninput  = applyCurrency;
+  curSel.onblur   = applyCurrency;
+}
+
+function flashButton(btn, msg){
+  if (!btn) return;
+  if (!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
+  btn.innerHTML = msg;
+  setTimeout(function(){ btn.innerHTML = btn.dataset.orig; }, 1800);
+}
+
+function clearDay(){
+  var btn = document.querySelector('.btns button.red');
+  if (confirmPending !== 'day') {
+    confirmPending = 'day';
+    flashButton(btn, 'Tap again to clear day');
+    setTimeout(function(){ if (confirmPending === 'day') { confirmPending = null; flashButton(btn, '🧹 Clear Day'); } }, 2500);
+    return;
+  }
+  confirmPending = null;
+  var d = load();
+  d[curDay] = {};
+  save(d);
+  fillInputs();
+  buildDayPicker();
+  updateAll();
+  flashButton(btn, '✓ Day cleared');
+}
+
+function clearAll(){
+  var btn = document.querySelector('.btns button:not(.red)');
+  if (confirmPending !== 'all') {
+    confirmPending = 'all';
+    flashButton(btn, 'Tap again to reset month');
+    setTimeout(function(){ if (confirmPending === 'all') { confirmPending = null; flashButton(btn, '🔄 Reset Month'); } }, 2500);
+    return;
+  }
+  confirmPending = null;
+  try { localStorage.removeItem(monthKey()); } catch(e){}
+  fillInputs();
+  buildDayPicker();
+  updateAll();
+  flashButton(btn, '✓ Month reset');
+}
+
+try {
+  var savedCur = localStorage.getItem('expCurrency');
+  if (savedCur) cfg.currency = savedCur;
+} catch(e){}
+
+buildMonthYear();
+bindCfg();
+attachInputs();
+
+$('dayPicker').addEventListener('click', function(ev){
+  var t = ev.target;
+  if (t && t.getAttribute && t.getAttribute('data-day')) {
+    curDay = parseInt(t.getAttribute('data-day'),10);
+    buildDayPicker();
+    fillInputs();
+    updateAll();
+  }
+});
+
+var now = new Date();
+curDay = (now.getFullYear()===cfg.year && now.getMonth()===cfg.month) ? now.getDate() : 1;
+$('daysCount').value = daysInMonth(cfg.year, cfg.month);
+buildDayPicker();
+fillInputs();
+updateAll();
+</script>
+</body>
+</html>
