@@ -67,9 +67,9 @@
 <div class="panel">
   <h3>⚙️ Budget Setup</h3>
   <div class="row">
-    <div><label>Monthly allowance</label><input type="number" inputmode="decimal" id="allowance" value="2500"></div>
-    <div><label>Save this month</label><input type="number" inputmode="decimal" id="savings" value="0"></div>
-    <div><label>Days in month</label><input type="number" id="daysCount" readonly></div>
+    <div><label>Monthly allowance</label><input type="text" id="allowance" value="2500"></div>
+    <div><label>Save this month</label><input type="text" id="savings" value="0"></div>
+    <div><label>Days in month</label><input type="text" id="daysCount" readonly></div>
     <div><label>Currency</label>
       <select id="currency">
         <option value="¥">¥ Yuan</option><option value="$">$ USD</option>
@@ -108,25 +108,25 @@
 <div class="card">
   <h2 id="foodTitle">🍽️ Food — ¥0</h2>
   <div class="flds">
-    <div class="fld"><label>🌅 Breakfast</label><input type="number" inputmode="decimal" id="mb" placeholder="0"></div>
-    <div class="fld"><label>☀️ Lunch</label><input type="number" inputmode="decimal" id="ml" placeholder="0"></div>
-    <div class="fld"><label>🌙 Dinner</label><input type="number" inputmode="decimal" id="md" placeholder="0"></div>
-    <div class="fld"><label>🍿 Snacks</label><input type="number" inputmode="decimal" id="ms" placeholder="0"></div>
+    <div class="fld"><label>🌅 Breakfast</label><input type="text" id="mb" placeholder="0"></div>
+    <div class="fld"><label>☀️ Lunch</label><input type="text" id="ml" placeholder="0"></div>
+    <div class="fld"><label>🌙 Dinner</label><input type="text" id="md" placeholder="0"></div>
+    <div class="fld"><label>🍿 Snacks</label><input type="text" id="ms" placeholder="0"></div>
   </div>
 </div>
 
 <div class="card">
   <h2 id="spendTitle">💸 Spending — ¥0</h2>
   <div class="flds">
-    <div class="fld"><label>🛒 Other</label><input type="number" inputmode="decimal" id="mo" placeholder="0"></div>
-    <div class="fld"><label>🚌 Transport</label><input type="number" inputmode="decimal" id="mt" placeholder="0"></div>
+    <div class="fld"><label>🛒 Other</label><input type="text" id="mo" placeholder="0"></div>
+    <div class="fld"><label>🚌 Transport</label><input type="text" id="mt" placeholder="0"></div>
   </div>
 </div>
 
 <div class="card">
   <h2 id="depTitle">🏦 Deposit — ¥0</h2>
   <div class="flds">
-    <div class="fld"><label>💵 Amount today</label><input type="number" inputmode="decimal" id="mp" placeholder="0"></div>
+    <div class="fld"><label>💵 Amount today</label><input type="text" id="mp" placeholder="0"></div>
   </div>
 </div>
 
@@ -149,9 +149,13 @@ var curDay = 1;
 var confirmPending = null;
 
 function $(id){ return document.getElementById(id); }
-function num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function num(v){
+  if (typeof v === 'string') v = v.replace(',', '.');
+  var n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
 function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
-function monthKey(){ return 'expV13_' + cfg.year + '-' + (cfg.month+1); }
+function monthKey(){ return 'expV15_' + cfg.year + '-' + (cfg.month+1); }
 function load(){ try { return JSON.parse(localStorage.getItem(monthKey())) || {}; } catch(e){ return {}; } }
 function save(d){ try { localStorage.setItem(monthKey(), JSON.stringify(d)); } catch(e){} }
 function sym(){ return cfg.currency; }
@@ -286,9 +290,8 @@ function bindCfg(){
   var applyCurrency = function(){
     cfg.currency = curSel.value;
     try { localStorage.setItem('expCurrency', cfg.currency); } catch(e){}
-    buildMonthYear();
-    buildDayPicker();
     updateAll();
+    buildDayPicker();
   };
   curSel.onchange = applyCurrency;
   curSel.oninput  = applyCurrency;
