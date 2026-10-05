@@ -2,48 +2,39 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Expense Tracker</title>
 <style>
-  * { box-sizing: border-box; font-family: Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+  * { box-sizing: border-box; font-family: Arial, sans-serif; }
   body { margin: 0; background: #f0f4fa; padding: 12px; }
   h1 { font-size: 20px; margin: 0 0 12px; }
   .panel { background: #fff; border: 1px solid #dde; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
   h3 { font-size: 13px; text-transform: uppercase; color: #1e4a8b; margin: 0 0 10px; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   label { font-size: 12px; font-weight: 600; color: #556; display: block; margin-bottom: 4px; }
-  input, select { height: 44px; font-size: 16px; font-weight: 600; border: 2px solid #dde;
-    border-radius: 10px; padding: 0 10px; width: 100%; background: #fff;
-    -webkit-appearance: none; appearance: none; }
+  input, select { height: 44px; font-size: 16px; font-weight: 600; border: 2px solid #dde; border-radius: 10px; padding: 0 10px; width: 100%; }
   input:focus, select:focus { outline: none; border-color: #1e4a8b; }
-  .limit { background: #1e4a8b; color: #fff; border-radius: 14px; padding: 18px;
-    margin-bottom: 12px; text-align: center; }
+  .limit { background: #1e4a8b; color: #fff; border-radius: 14px; padding: 18px; margin-bottom: 12px; text-align: center; }
   .limit small { font-size: 12px; text-transform: uppercase; opacity: .9; }
   .limit b { display: block; font-size: 34px; margin: 6px 0; }
   .limit span { font-size: 13px; }
-  .balance { background: #fff; border: 2px solid #1e4a8b; border-radius: 14px;
-    padding: 14px; margin-bottom: 12px; }
+  .balance { background: #fff; border: 2px solid #1e4a8b; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
   .balance h3 { color: #1e4a8b; margin-bottom: 12px; }
-  .brow { display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 0; border-bottom: 1px solid #eef; font-size: 14px; }
+  .brow { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eef; font-size: 14px; }
   .brow:last-child { border-bottom: none; }
   .brow span:first-child { color: #556; font-weight: 600; }
   .brow span:last-child { font-weight: 800; font-size: 16px; color: #1e4a8b; }
   .brow.debt span:last-child { color: #c00; }
   .brow.surplus span:last-child { color: #059669; }
-  .brow.today { background: #eef5ff; margin: 0 -14px; padding: 10px 14px; border-radius: 0; }
+  .brow.today { background: #eef5ff; margin: 0 -14px; padding: 10px 14px; }
   .brow.today span:last-child { font-size: 20px; }
   .boxes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-  .box { flex: 1; min-width: 110px; background: #1e4a8b; color: #fff;
-    border-radius: 12px; padding: 10px 14px; }
+  .box { flex: 1; min-width: 110px; background: #1e4a8b; color: #fff; border-radius: 12px; padding: 10px 14px; }
   .box small { display: block; font-size: 11px; opacity: .85; text-transform: uppercase; }
   .box b { font-size: 18px; }
-  .wk { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 6px;
-    font-size: 11px; font-weight: 700; color: #889; text-align: center; }
+  .wk { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: #889; text-align: center; }
   .days { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
-  .days button { height: 44px; min-height: 44px; border-radius: 8px; border: 2px solid #dde;
-    background: #fff; font-weight: 700; font-size: 15px; cursor: pointer;
-    -webkit-appearance: none; appearance: none; padding: 0; touch-action: manipulation; }
+  .days button { height: 44px; border-radius: 8px; border: 2px solid #dde; background: #fff; font-weight: 700; font-size: 15px; cursor: pointer; padding: 0; }
   .days button.empty { visibility: hidden; border: none; }
   .days button.on { background: #1e4a8b; color: #fff; border-color: #1e4a8b; }
   .days button.has { background: #eef5ff; border-color: #93c5fd; color: #1e4a8b; }
@@ -54,25 +45,20 @@
   .tot small { font-size: 12px; text-transform: uppercase; opacity: .9; }
   .tot b { display: block; font-size: 28px; margin: 4px 0; }
   .tot span { font-size: 13px; }
-  .card { background: #fff; border: 1px solid #dde; border-radius: 14px;
-    padding: 14px; margin-bottom: 12px; }
+  .card { background: #fff; border: 1px solid #dde; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
   .card h2 { font-size: 13px; text-transform: uppercase; color: #667; margin: 0 0 10px; }
   .flds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .fld input { height: 46px; font-size: 16px; font-weight: 700; text-align: center; }
-  .note { width: 100%; height: 34px; font-size: 13px; font-weight: 500;
-    border: 2px solid #eef; border-radius: 8px; padding: 0 10px; margin-top: 8px;
-    background: #fafbff; color: #334; -webkit-appearance: none; appearance: none; }
-  .note:focus { outline: none; border-color: #93c5fd; background: #fff; }
-  .btns { display: flex; gap: 8px; margin-top: 10px; }
-  .btns button { flex: 1; height: 46px; border-radius: 10px; border: 2px solid #dde;
-    background: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
-    -webkit-appearance: none; appearance: none; }
+  .btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .btns button { flex: 1; min-width: 120px; height: 46px; border-radius: 10px; border: 2px solid #dde; background: #fff; font-weight: 700; font-size: 14px; cursor: pointer; padding: 0 10px; }
   .btns button.red { color: #c00; border-color: #fbb; }
+  .btns button.copy { color: #059669; border-color: #86efac; background: #ecfdf5; }
+  .btns button.pdf { color: #1e4a8b; border-color: #93c5fd; background: #eef5ff; }
 </style>
 </head>
 <body>
 
-<h1>💰 Expense & Budget Tracker</h1>
+<h1>💰 Expense Tracker</h1>
 
 <div class="panel">
   <h3>📅 Month & Year</h3>
@@ -147,7 +133,6 @@
     <div class="fld"><label>🌙 Dinner</label><input type="text" id="md" placeholder="0"></div>
     <div class="fld"><label>🍿 Snacks</label><input type="text" id="ms" placeholder="0"></div>
   </div>
-  <input type="text" class="note" id="noteFood" placeholder="📝 Note (optional)">
 </div>
 
 <div class="card">
@@ -157,7 +142,6 @@
     <div class="fld"><label>🚌 Transport</label><input type="text" id="mt" placeholder="0"></div>
     <div class="fld"><label>💡 Electricity</label><input type="text" id="me" placeholder="0"></div>
   </div>
-  <input type="text" class="note" id="noteSpend" placeholder="📝 Note (optional)">
 </div>
 
 <div class="card">
@@ -165,88 +149,63 @@
   <div class="flds">
     <div class="fld"><label>💵 Amount today</label><input type="text" id="mp" placeholder="0"></div>
   </div>
-  <input type="text" class="note" id="noteDep" placeholder="📝 Note (optional)">
 </div>
 
+<div class="btns">
+  <button class="copy" type="button" onclick="copyData()">📋 Copy Data</button>
+  <button class="copy" type="button" onclick="pasteData()">📥 Paste Data</button>
+</div>
+<div class="btns">
+  <button class="pdf" type="button" onclick="downloadPDF()">⬇️ Download PDF</button>
+</div>
 <div class="btns">
   <button class="red" type="button" onclick="clearDay()">🧹 Clear Day</button>
   <button type="button" onclick="clearAll()">🔄 Reset Month</button>
 </div>
 
+<!-- jsPDF library from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-var MONTHS = ['January','February','March','April','May','June',
-              'July','August','September','October','November','December'];
+var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 var FIDS = {breakfast:'mb',lunch:'ml',dinner:'md',snacks:'ms',other:'mo',transport:'mt',electricity:'me',deposit:'mp'};
-var NOTES = {noteFood:'foodNote', noteSpend:'spendNote', noteDep:'depNote'};
 
-var cfg = {
-  allowance: 2500, savings: 0, currency: '¥',
-  year: new Date().getFullYear(),
-  month: new Date().getMonth()
-};
+var cfg = { allowance: 2500, savings: 0, currency: '¥', year: new Date().getFullYear(), month: new Date().getMonth() };
 var curDay = 1;
 var confirmPending = null;
 
 function $(id){ return document.getElementById(id); }
-function num(v){
-  if (typeof v === 'string') v = v.replace(',', '.');
-  var n = parseFloat(v);
-  return isNaN(n) ? 0 : n;
-}
+function num(v){ if (typeof v === 'string') v = v.replace(',', '.'); var n = parseFloat(v); return isNaN(n) ? 0 : n; }
 function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
-function monthKey(){ return 'expV23_' + cfg.year + '-' + (cfg.month+1); }
+function monthKey(){ return 'expV29_' + cfg.year + '-' + (cfg.month+1); }
 function load(){ try { return JSON.parse(localStorage.getItem(monthKey())) || {}; } catch(e){ return {}; } }
 function save(d){ try { localStorage.setItem(monthKey(), JSON.stringify(d)); } catch(e){} }
 function sym(){ return cfg.currency; }
 function fmt(v){
-  var n = num(v);
-  var sign = n < 0 ? '-' : '';
-  var abs = Math.abs(n);
+  var n = num(v); var sign = n < 0 ? '-' : ''; var abs = Math.abs(n);
   var s = abs.toFixed(2).split('.');
   s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return sign + sym() + s[0] + ',' + s[1];
 }
-function dailyLimit(){
-  var spend = cfg.allowance - cfg.savings;
-  var d = daysInMonth(cfg.year, cfg.month);
-  return d > 0 ? spend / d : 0;
-}
-function daySpent(rec){
-  return num(rec.breakfast)+num(rec.lunch)+num(rec.dinner)+num(rec.snacks)
-       + num(rec.other)+num(rec.transport)+num(rec.electricity);
-}
+function dailyLimit(){ var spend = cfg.allowance - cfg.savings; var d = daysInMonth(cfg.year, cfg.month); return d > 0 ? spend / d : 0; }
+function daySpent(rec){ return num(rec.breakfast)+num(rec.lunch)+num(rec.dinner)+num(rec.snacks)+num(rec.other)+num(rec.transport)+num(rec.electricity); }
 function lastActiveDay(){
-  var d = load();
-  var dim = daysInMonth(cfg.year, cfg.month);
-  var last = 0;
-  for (var i = 1; i <= dim; i++) {
-    var r = d[i] || {};
-    if (daySpent(r) > 0 || num(r.deposit) > 0) last = i;
-  }
+  var d = load(); var dim = daysInMonth(cfg.year, cfg.month); var last = 0;
+  for (var i = 1; i <= dim; i++) { var r = d[i] || {}; if (daySpent(r) > 0 || num(r.deposit) > 0) last = i; }
   return last;
 }
 function runningCarry(){
-  var d = load();
-  var limit = dailyLimit();
-  var last = lastActiveDay();
-  var carry = 0;
-  for (var i = 1; i <= last; i++) {
-    carry += limit - daySpent(d[i] || {});
-  }
+  var d = load(); var limit = dailyLimit(); var last = lastActiveDay(); var carry = 0;
+  for (var i = 1; i <= last; i++) carry += limit - daySpent(d[i] || {});
   return carry;
 }
 
 function buildMonthYear(){
   var mh = '';
-  for (var i = 0; i < 12; i++) {
-    mh += '<option value="'+i+'"'+(i===cfg.month?' selected':'')+'>'+MONTHS[i]+'</option>';
-  }
+  for (var i = 0; i < 12; i++) mh += '<option value="'+i+'"'+(i===cfg.month?' selected':'')+'>'+MONTHS[i]+'</option>';
   $('monthSel').innerHTML = mh;
   var nowY = new Date().getFullYear();
   var yh = '';
-  for (var y = nowY-5; y <= nowY+3; y++) {
-    yh += '<option value="'+y+'"'+(y===cfg.year?' selected':'')+'>'+y+'</option>';
-  }
+  for (var y = nowY-5; y <= nowY+3; y++) yh += '<option value="'+y+'"'+(y===cfg.year?' selected':'')+'>'+y+'</option>';
   $('yearSel').innerHTML = yh;
   $('monthSel').onchange = function(){ cfg.month = parseInt(this.value,10); switchMonth(); };
   $('yearSel').onchange  = function(){ cfg.year  = parseInt(this.value,10); switchMonth(); };
@@ -258,9 +217,7 @@ function switchMonth(){
   var dim = daysInMonth(cfg.year, cfg.month);
   if (curDay > dim) curDay = dim;
   $('daysCount').value = dim;
-  buildDayPicker();
-  fillInputs();
-  updateAll();
+  buildDayPicker(); fillInputs(); updateAll();
 }
 
 function buildDayPicker(){
@@ -269,12 +226,10 @@ function buildDayPicker(){
   var wh = '';
   for (var i = 0; i < 7; i++) wh += '<div>'+names[(first+i)%7]+'</div>';
   $('wkHeader').innerHTML = wh;
-
   var dim = daysInMonth(cfg.year, cfg.month);
-  var d = load();
-  var limit = dailyLimit();
+  var d = load(); var limit = dailyLimit();
   var html = '';
-  for (var b = 0; b < first; b++) html += '<button type="button" class="empty" tabindex="-1"></button>';
+  for (var b = 0; b < first; b++) html += '<button type="button" class="empty"></button>';
   for (var day = 1; day <= dim; day++) {
     var spent = daySpent(d[day] || {});
     var hasData = spent > 0;
@@ -286,62 +241,44 @@ function buildDayPicker(){
 }
 
 function fillInputs(){
-  var d = load();
-  var day = d[curDay] || {};
-  Object.keys(FIDS).forEach(function(f){
-    var el = $(FIDS[f]);
-    if (el) el.value = day[f] || '';
-  });
-  Object.keys(NOTES).forEach(function(nid){
-    var el = $(nid);
-    if (el) el.value = day[NOTES[nid]] || '';
-  });
+  var d = load(); var day = d[curDay] || {};
+  Object.keys(FIDS).forEach(function(f){ var el = $(FIDS[f]); if (el) el.value = day[f] || ''; });
 }
 
 function updateAll(){
-  var d = load();
-  var day = d[curDay] || {};
+  var d = load(); var day = d[curDay] || {};
   var food  = num(day.breakfast)+num(day.lunch)+num(day.dinner)+num(day.snacks);
   var spend = num(day.other)+num(day.transport)+num(day.electricity);
   var dep   = num(day.deposit);
   var total = food + spend;
   var baseLimit = dailyLimit();
 
-  /* BOTTOM blue card */
   $('dayLabel').textContent = MONTHS[cfg.month] + ' ' + curDay;
   $('dayTotal').textContent = fmt(total);
   $('dayLimit').textContent = 'Limit ' + fmt(baseLimit) + ' — ' +
     (total > baseLimit ? 'over ' + fmt(total - baseLimit) : 'left ' + fmt(baseLimit - total));
 
-  /* TOP Balance Summary */
   var carry = runningCarry();
   $('bCarry').textContent = fmt(carry);
   $('bCarry').parentElement.className = 'brow today ' + (carry < 0 ? 'debt' : (carry > 0 ? 'surplus' : ''));
-  var todayAvail = baseLimit + carry;
-  $('bToday').textContent = fmt(todayAvail);
+  $('bToday').textContent = fmt(baseLimit + carry);
   $('bMonth').textContent = fmt(carry);
   $('bMonthRow').className = 'brow ' + (carry < 0 ? 'debt' : (carry > 0 ? 'surplus' : ''));
 
-  /* card titles */
   $('foodTitle').textContent  = '🍽️ Food — ' + fmt(food);
   $('spendTitle').textContent = '💸 Spending — ' + fmt(spend);
   $('depTitle').textContent   = '🏦 Deposit — ' + fmt(dep);
 
-  /* month summary boxes */
   var mSpent = 0, mDep = 0;
   var dim = daysInMonth(cfg.year, cfg.month);
-  for (var i = 1; i <= dim; i++) {
-    var r = d[i] || {};
-    mSpent += daySpent(r);
-    mDep   += num(r.deposit);
-  }
+  for (var i = 1; i <= dim; i++) { var r = d[i] || {}; mSpent += daySpent(r); mDep += num(r.deposit); }
   $('mSpent').textContent = fmt(mSpent);
   $('mLeft').textContent  = fmt(cfg.allowance - mSpent);
   $('mDep').textContent   = fmt(mDep);
 
   $('dailyLimit').textContent = fmt(baseLimit);
-  $('limitSub').textContent = 'Allowance ' + fmt(cfg.allowance) + ' · Save ' +
-    fmt(cfg.savings) + ' · ' + dim + ' days → ' + fmt(cfg.allowance - cfg.savings) + ' spendable';
+  $('limitSub').textContent = 'Allowance ' + fmt(cfg.allowance) + ' · Save ' + fmt(cfg.savings) +
+    ' · ' + dim + ' days → ' + fmt(cfg.allowance - cfg.savings) + ' spendable';
 }
 
 function attachInputs(){
@@ -352,24 +289,9 @@ function attachInputs(){
       var d = load();
       if (!d[curDay]) d[curDay] = {};
       d[curDay][field] = num(this.value);
-      save(d);
-      buildDayPicker();
-      updateAll();
+      save(d); buildDayPicker(); updateAll();
     };
-    el.oninput  = handler;
-    el.onchange = handler;
-  });
-  Object.keys(NOTES).forEach(function(nid){
-    var el = $(nid);
-    if (!el) return;
-    var handler = function(){
-      var d = load();
-      if (!d[curDay]) d[curDay] = {};
-      d[curDay][NOTES[nid]] = this.value;
-      save(d);
-    };
-    el.oninput  = handler;
-    el.onchange = handler;
+    el.oninput = handler; el.onchange = handler;
   });
 }
 
@@ -377,20 +299,15 @@ function bindCfg(){
   $('allowance').value = cfg.allowance;
   $('savings').value = cfg.savings;
   $('currency').value = cfg.currency;
-
   $('allowance').oninput = function(){ cfg.allowance = num(this.value); buildDayPicker(); updateAll(); };
   $('savings').oninput   = function(){ cfg.savings   = num(this.value); buildDayPicker(); updateAll(); };
-
   var curSel = $('currency');
-  var applyCurrency = function(){
+  var apply = function(){
     cfg.currency = curSel.value;
     try { localStorage.setItem('expCurrency', cfg.currency); } catch(e){}
-    updateAll();
-    buildDayPicker();
+    updateAll(); buildDayPicker();
   };
-  curSel.onchange = applyCurrency;
-  curSel.oninput  = applyCurrency;
-  curSel.onblur   = applyCurrency;
+  curSel.onchange = apply; curSel.oninput = apply; curSel.onblur = apply;
 }
 
 function flashButton(btn, msg){
@@ -403,41 +320,265 @@ function flashButton(btn, msg){
 function clearDay(){
   var btn = document.querySelector('.btns button.red');
   if (confirmPending !== 'day') {
-    confirmPending = 'day';
-    flashButton(btn, 'Tap again to clear day');
+    confirmPending = 'day'; flashButton(btn, 'Tap again to clear day');
     setTimeout(function(){ if (confirmPending === 'day') { confirmPending = null; flashButton(btn, '🧹 Clear Day'); } }, 2500);
     return;
   }
   confirmPending = null;
-  var d = load();
-  d[curDay] = {};
-  save(d);
-  fillInputs();
-  buildDayPicker();
-  updateAll();
+  var d = load(); d[curDay] = {}; save(d);
+  fillInputs(); buildDayPicker(); updateAll();
   flashButton(btn, '✓ Day cleared');
 }
 
 function clearAll(){
-  var btn = document.querySelector('.btns button:not(.red)');
+  var btn = document.querySelector('.btns button:not(.red):not(.copy):not(.pdf)');
   if (confirmPending !== 'all') {
-    confirmPending = 'all';
-    flashButton(btn, 'Tap again to reset month');
+    confirmPending = 'all'; flashButton(btn, 'Tap again to reset month');
     setTimeout(function(){ if (confirmPending === 'all') { confirmPending = null; flashButton(btn, '🔄 Reset Month'); } }, 2500);
     return;
   }
   confirmPending = null;
   try { localStorage.removeItem(monthKey()); } catch(e){}
-  fillInputs();
-  buildDayPicker();
-  updateAll();
+  fillInputs(); buildDayPicker(); updateAll();
   flashButton(btn, '✓ Month reset');
 }
 
-try {
-  var savedCur = localStorage.getItem('expCurrency');
-  if (savedCur) cfg.currency = savedCur;
-} catch(e){}
+/* COPY */
+function copyData(){
+  var d = load();
+  var payload = { v:1, year:cfg.year, month:cfg.month, allowance:cfg.allowance, savings:cfg.savings, currency:cfg.currency, days:d };
+  var text = 'EXPTRK1:' + JSON.stringify(payload);
+  var btn = document.querySelector('.btns button.copy');
+  copyText(text).then(function(ok){ flashButton(btn, ok ? '✓ Copied!' : '✗ Copy failed'); });
+}
+function copyText(text){
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text).then(function(){ return true; }).catch(function(){ return fallbackCopy(text); });
+  }
+  return Promise.resolve(fallbackCopy(text));
+}
+function fallbackCopy(text){
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    var ok = document.execCommand('copy');
+    document.body.removeChild(ta); return ok;
+  } catch(e){ return false; }
+}
+
+/* PASTE */
+function pasteData(){
+  var btn = document.querySelectorAll('.btns button.copy')[1];
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    navigator.clipboard.readText().then(function(text){ applyPasted(text, btn); })
+      .catch(function(){ var t = prompt('Paste your data here:'); if (t) applyPasted(t, btn); });
+  } else {
+    var t = prompt('Paste your data here:');
+    if (t) applyPasted(t, btn);
+  }
+}
+function applyPasted(text, btn){
+  if (!text || text.indexOf('EXPTRK1:') !== 0) { flashButton(btn, '✗ Invalid data'); return; }
+  try {
+    var payload = JSON.parse(text.substring(8));
+    if (!payload || !payload.days) throw new Error('bad');
+    if (!confirm('Overwrite ' + MONTHS[payload.month] + ' ' + payload.year + '?')) return;
+
+    cfg.year = payload.year; cfg.month = payload.month;
+    cfg.allowance = payload.allowance; cfg.savings = payload.savings;
+    cfg.currency = payload.currency || '¥';
+    try { localStorage.setItem('expCurrency', cfg.currency); } catch(e){}
+    try { localStorage.setItem('expV29_' + cfg.year + '-' + (cfg.month+1), JSON.stringify(payload.days)); } catch(e){}
+
+    $('allowance').value = cfg.allowance;
+    $('savings').value = cfg.savings;
+    $('currency').value = cfg.currency;
+    buildMonthYear();
+    $('daysCount').value = daysInMonth(cfg.year, cfg.month);
+    curDay = 1;
+    buildDayPicker(); fillInputs(); updateAll();
+    flashButton(btn, '✓ Data pasted');
+  } catch(e){ flashButton(btn, '✗ Bad format'); }
+}
+
+/* ============ DOWNLOAD PDF (via jsPDF, no print dialog) ============ */
+function downloadPDF(){
+  var btn = document.querySelector('.btns button.pdf');
+
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    flashButton(btn, '✗ Loading library…');
+    setTimeout(downloadPDF, 800);
+    return;
+  }
+
+  var d = load();
+  var dim = daysInMonth(cfg.year, cfg.month);
+  var baseLimit = dailyLimit();
+  var carry = runningCarry();
+  var monthLabel = MONTHS[cfg.month] + ' ' + cfg.year;
+
+  var mSpent = 0, mDep = 0;
+  for (var i = 1; i <= dim; i++) { var r = d[i] || {}; mSpent += daySpent(r); mDep += num(r.deposit); }
+
+  try {
+    var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+    var M = 15;              // left/right margin
+    var W = 210;             // page width
+    var y = M;               // current y position
+    var lineH = 6;
+    var colRight = W - M;
+
+    // ---- Title ----
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(30, 74, 139);
+    doc.text('Expense Summary', M, y + 6);
+    y += 10;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(120, 120, 120);
+    doc.text(monthLabel + '  ·  Printed ' + new Date().toLocaleDateString(), M, y);
+    y += 8;
+
+    // divider
+    doc.setDrawColor(200);
+    doc.line(M, y, colRight, y);
+    y += 6;
+
+    // ---- Section helper ----
+    function section(title){
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 74, 139);
+      doc.text(title.toUpperCase(), M, y);
+      y += 2;
+      doc.setDrawColor(220);
+      doc.line(M, y, colRight, y);
+      y += 5;
+      doc.setTextColor(0);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+    }
+    function row(label, value){
+      doc.setTextColor(80);
+      doc.text(label, M, y);
+      doc.setTextColor(0);
+      doc.setFont('helvetica', 'bold');
+      doc.text(String(value), colRight, y, { align: 'right' });
+      doc.setFont('helvetica', 'normal');
+      y += lineH;
+    }
+    function gap(n){ y += (n || 4); }
+
+    // ---- Budget Setup ----
+    section('Budget Setup');
+    row('Monthly allowance', fmt(cfg.allowance));
+    row('Target savings', fmt(cfg.savings));
+    row('Days in month', dim);
+    row('Base daily limit', fmt(baseLimit));
+    gap(6);
+
+    // ---- Balance Summary ----
+    section('Balance Summary');
+    row('Leftover money', fmt(carry));
+    row('Spendable today', fmt(baseLimit + carry));
+    row('Balance so far this month', fmt(carry));
+    gap(6);
+
+    // ---- Month Totals ----
+    section('Month Totals');
+    row('Total spent', fmt(mSpent));
+    row('Deposited', fmt(mDep));
+    row('Remaining', fmt(cfg.allowance - mSpent));
+    gap(6);
+
+    // ---- Daily Entries table ----
+    section('Daily Entries');
+
+    var cols = [
+      { name: 'Day',   x: M + 0,  w: 12, align: 'left' },
+      { name: 'B',     x: M + 14, w: 14 },
+      { name: 'L',     x: M + 28, w: 14 },
+      { name: 'D',     x: M + 42, w: 14 },
+      { name: 'S',     x: M + 56, w: 14 },
+      { name: 'Other', x: M + 70, w: 18 },
+      { name: 'Trans', x: M + 88, w: 18 },
+      { name: 'Elec',  x: M + 106,w: 18 },
+      { name: 'Dep',   x: M + 124,w: 18 },
+      { name: 'Total', x: M + 142,w: 38, align: 'right' }
+    ];
+
+    // header row
+    doc.setFillColor(238, 245, 255);
+    doc.rect(M, y - 4, colRight - M, 6, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 74, 139);
+    for (var c = 0; c < cols.length; c++) {
+      var col = cols[c];
+      if (col.align === 'right') {
+        doc.text(col.name, col.x + col.w, y);
+      } else {
+        doc.text(col.name, col.x, y);
+      }
+    }
+    y += 6;
+    doc.setTextColor(0);
+    doc.setFont('helvetica', 'normal');
+
+    // data rows
+    var any = false;
+    for (var i = 1; i <= dim; i++) {
+      var r = d[i] || {};
+      var spent = daySpent(r);
+      var dep = num(r.deposit);
+      if (spent === 0 && dep === 0) continue;
+      any = true;
+
+      if (y > 275) { doc.addPage(); y = M; }
+
+      doc.text(String(i),                     cols[0].x,  y);
+      doc.text(String(num(r.breakfast)||''),  cols[1].x,  y, { align: 'right' });
+      doc.text(String(num(r.lunch)||''),      cols[2].x,  y, { align: 'right' });
+      doc.text(String(num(r.dinner)||''),     cols[3].x,  y, { align: 'right' });
+      doc.text(String(num(r.snacks)||''),     cols[4].x,  y, { align: 'right' });
+      doc.text(String(num(r.other)||''),      cols[5].x,  y, { align: 'right' });
+      doc.text(String(num(r.transport)||''),  cols[6].x,  y, { align: 'right' });
+      doc.text(String(num(r.electricity)||''),cols[7].x,  y, { align: 'right' });
+      doc.text(String(dep||''),               cols[8].x,  y, { align: 'right' });
+      doc.setFont('helvetica', 'bold');
+      doc.text(fmt(spent),                    cols[9].x + cols[9].w, y, { align: 'right' });
+      doc.setFont('helvetica', 'normal');
+      y += lineH;
+    }
+    if (!any) {
+      doc.setTextColor(120);
+      doc.text('No entries this month', M, y);
+      y += lineH;
+    }
+
+    // footer
+    y += 6;
+    doc.setDrawColor(200);
+    doc.line(M, y, colRight, y);
+    y += 5;
+    doc.setFontSize(8);
+    doc.setTextColor(140);
+    doc.text('Generated by Expense & Budget Tracker', W / 2, y, { align: 'center' });
+
+    // ---- Save ----
+    var fname = 'expenses-' + cfg.year + '-' + (cfg.month+1) + '.pdf';
+    doc.save(fname);
+    flashButton(btn, '✓ Downloaded');
+  } catch(err) {
+    flashButton(btn, '✗ Error — see console');
+    console.error(err);
+  }
+}
+
+/* INIT */
+try { var sc = localStorage.getItem('expCurrency'); if (sc) cfg.currency = sc; } catch(e){}
 
 buildMonthYear();
 bindCfg();
@@ -447,9 +588,7 @@ $('dayPicker').addEventListener('click', function(ev){
   var t = ev.target;
   if (t && t.getAttribute && t.getAttribute('data-day')) {
     curDay = parseInt(t.getAttribute('data-day'),10);
-    buildDayPicker();
-    fillInputs();
-    updateAll();
+    buildDayPicker(); fillInputs(); updateAll();
   }
 });
 
