@@ -21,6 +21,18 @@
   .limit small { font-size: 12px; text-transform: uppercase; opacity: .9; }
   .limit b { display: block; font-size: 34px; margin: 6px 0; }
   .limit span { font-size: 13px; }
+  .balance { background: #fff; border: 2px solid #1e4a8b; border-radius: 14px;
+    padding: 14px; margin-bottom: 12px; }
+  .balance h3 { color: #1e4a8b; margin-bottom: 12px; }
+  .brow { display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid #eef; font-size: 14px; }
+  .brow:last-child { border-bottom: none; }
+  .brow span:first-child { color: #556; font-weight: 600; }
+  .brow span:last-child { font-weight: 800; font-size: 16px; color: #1e4a8b; }
+  .brow.debt span:last-child { color: #c00; }
+  .brow.surplus span:last-child { color: #059669; }
+  .brow.today { background: #eef5ff; margin: 0 -14px; padding: 10px 14px; border-radius: 0; }
+  .brow.today span:last-child { font-size: 20px; }
   .boxes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .box { flex: 1; min-width: 110px; background: #1e4a8b; color: #fff;
     border-radius: 12px; padding: 10px 14px; }
@@ -36,6 +48,8 @@
   .days button.on { background: #1e4a8b; color: #fff; border-color: #1e4a8b; }
   .days button.has { background: #eef5ff; border-color: #93c5fd; color: #1e4a8b; }
   .days button.on.has { background: #1e4a8b; color: #fff; }
+  .days button.over { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
+  .days button.on.over { background: #dc2626; color: #fff; border-color: #dc2626; }
   .tot { background: #1e4a8b; color: #fff; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
   .tot small { font-size: 12px; text-transform: uppercase; opacity: .9; }
   .tot b { display: block; font-size: 28px; margin: 4px 0; }
@@ -45,6 +59,10 @@
   .card h2 { font-size: 13px; text-transform: uppercase; color: #667; margin: 0 0 10px; }
   .flds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .fld input { height: 46px; font-size: 16px; font-weight: 700; text-align: center; }
+  .note { width: 100%; height: 34px; font-size: 13px; font-weight: 500;
+    border: 2px solid #eef; border-radius: 8px; padding: 0 10px; margin-top: 8px;
+    background: #fafbff; color: #334; -webkit-appearance: none; appearance: none; }
+  .note:focus { outline: none; border-color: #93c5fd; background: #fff; }
   .btns { display: flex; gap: 8px; margin-top: 10px; }
   .btns button { flex: 1; height: 46px; border-radius: 10px; border: 2px solid #dde;
     background: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
@@ -82,9 +100,25 @@
 </div>
 
 <div class="limit">
-  <small>You can spend per day</small>
+  <small>Base daily limit</small>
   <b id="dailyLimit">¥0</b>
   <span id="limitSub">—</span>
+</div>
+
+<div class="balance">
+  <h3>📊 Balance Summary</h3>
+  <div class="brow today">
+    <span>Leftover money</span>
+    <span id="bCarry">¥0</span>
+  </div>
+  <div class="brow">
+    <span>Spendable today</span>
+    <span id="bToday">¥0</span>
+  </div>
+  <div class="brow" id="bMonthRow">
+    <span>Balance so far this month</span>
+    <span id="bMonth">¥0</span>
+  </div>
 </div>
 
 <div class="boxes">
@@ -113,6 +147,7 @@
     <div class="fld"><label>🌙 Dinner</label><input type="text" id="md" placeholder="0"></div>
     <div class="fld"><label>🍿 Snacks</label><input type="text" id="ms" placeholder="0"></div>
   </div>
+  <input type="text" class="note" id="noteFood" placeholder="📝 Note (optional)">
 </div>
 
 <div class="card">
@@ -120,7 +155,9 @@
   <div class="flds">
     <div class="fld"><label>🛒 Other</label><input type="text" id="mo" placeholder="0"></div>
     <div class="fld"><label>🚌 Transport</label><input type="text" id="mt" placeholder="0"></div>
+    <div class="fld"><label>💡 Electricity</label><input type="text" id="me" placeholder="0"></div>
   </div>
+  <input type="text" class="note" id="noteSpend" placeholder="📝 Note (optional)">
 </div>
 
 <div class="card">
@@ -128,6 +165,7 @@
   <div class="flds">
     <div class="fld"><label>💵 Amount today</label><input type="text" id="mp" placeholder="0"></div>
   </div>
+  <input type="text" class="note" id="noteDep" placeholder="📝 Note (optional)">
 </div>
 
 <div class="btns">
@@ -138,7 +176,8 @@
 <script>
 var MONTHS = ['January','February','March','April','May','June',
               'July','August','September','October','November','December'];
-var FIDS = {breakfast:'mb',lunch:'ml',dinner:'md',snacks:'ms',other:'mo',transport:'mt',deposit:'mp'};
+var FIDS = {breakfast:'mb',lunch:'ml',dinner:'md',snacks:'ms',other:'mo',transport:'mt',electricity:'me',deposit:'mp'};
+var NOTES = {noteFood:'foodNote', noteSpend:'spendNote', noteDep:'depNote'};
 
 var cfg = {
   allowance: 2500, savings: 0, currency: '¥',
@@ -155,19 +194,46 @@ function num(v){
   return isNaN(n) ? 0 : n;
 }
 function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
-function monthKey(){ return 'expV15_' + cfg.year + '-' + (cfg.month+1); }
+function monthKey(){ return 'expV23_' + cfg.year + '-' + (cfg.month+1); }
 function load(){ try { return JSON.parse(localStorage.getItem(monthKey())) || {}; } catch(e){ return {}; } }
 function save(d){ try { localStorage.setItem(monthKey(), JSON.stringify(d)); } catch(e){} }
 function sym(){ return cfg.currency; }
 function fmt(v){
-  var s = num(v).toFixed(2).split('.');
+  var n = num(v);
+  var sign = n < 0 ? '-' : '';
+  var abs = Math.abs(n);
+  var s = abs.toFixed(2).split('.');
   s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return sym() + s[0] + ',' + s[1];
+  return sign + sym() + s[0] + ',' + s[1];
 }
 function dailyLimit(){
   var spend = cfg.allowance - cfg.savings;
   var d = daysInMonth(cfg.year, cfg.month);
   return d > 0 ? spend / d : 0;
+}
+function daySpent(rec){
+  return num(rec.breakfast)+num(rec.lunch)+num(rec.dinner)+num(rec.snacks)
+       + num(rec.other)+num(rec.transport)+num(rec.electricity);
+}
+function lastActiveDay(){
+  var d = load();
+  var dim = daysInMonth(cfg.year, cfg.month);
+  var last = 0;
+  for (var i = 1; i <= dim; i++) {
+    var r = d[i] || {};
+    if (daySpent(r) > 0 || num(r.deposit) > 0) last = i;
+  }
+  return last;
+}
+function runningCarry(){
+  var d = load();
+  var limit = dailyLimit();
+  var last = lastActiveDay();
+  var carry = 0;
+  for (var i = 1; i <= last; i++) {
+    carry += limit - daySpent(d[i] || {});
+  }
+  return carry;
 }
 
 function buildMonthYear(){
@@ -206,13 +272,14 @@ function buildDayPicker(){
 
   var dim = daysInMonth(cfg.year, cfg.month);
   var d = load();
+  var limit = dailyLimit();
   var html = '';
   for (var b = 0; b < first; b++) html += '<button type="button" class="empty" tabindex="-1"></button>';
   for (var day = 1; day <= dim; day++) {
-    var rec = d[day] || {};
-    var tot = num(rec.breakfast)+num(rec.lunch)+num(rec.dinner)+num(rec.snacks)
-            + num(rec.other)+num(rec.transport);
-    var cls = (day===curDay?'on ':'') + (tot>0?'has':'');
+    var spent = daySpent(d[day] || {});
+    var hasData = spent > 0;
+    var isOver = hasData && spent > limit;
+    var cls = (day===curDay?'on ':'') + (hasData?'has ':'') + (isOver?'over':'');
     html += '<button type="button" class="'+cls.trim()+'" data-day="'+day+'">'+day+'</button>';
   }
   $('dayPicker').innerHTML = html;
@@ -225,38 +292,54 @@ function fillInputs(){
     var el = $(FIDS[f]);
     if (el) el.value = day[f] || '';
   });
+  Object.keys(NOTES).forEach(function(nid){
+    var el = $(nid);
+    if (el) el.value = day[NOTES[nid]] || '';
+  });
 }
 
 function updateAll(){
   var d = load();
   var day = d[curDay] || {};
   var food  = num(day.breakfast)+num(day.lunch)+num(day.dinner)+num(day.snacks);
-  var spend = num(day.other)+num(day.transport);
+  var spend = num(day.other)+num(day.transport)+num(day.electricity);
   var dep   = num(day.deposit);
   var total = food + spend;
-  var limit = dailyLimit();
+  var baseLimit = dailyLimit();
 
+  /* BOTTOM blue card */
   $('dayLabel').textContent = MONTHS[cfg.month] + ' ' + curDay;
   $('dayTotal').textContent = fmt(total);
-  $('dayLimit').textContent = 'Limit ' + fmt(limit) + ' — ' +
-    (total > limit ? 'over ' + fmt(total-limit) : 'left ' + fmt(limit-total));
+  $('dayLimit').textContent = 'Limit ' + fmt(baseLimit) + ' — ' +
+    (total > baseLimit ? 'over ' + fmt(total - baseLimit) : 'left ' + fmt(baseLimit - total));
 
+  /* TOP Balance Summary */
+  var carry = runningCarry();
+  $('bCarry').textContent = fmt(carry);
+  $('bCarry').parentElement.className = 'brow today ' + (carry < 0 ? 'debt' : (carry > 0 ? 'surplus' : ''));
+  var todayAvail = baseLimit + carry;
+  $('bToday').textContent = fmt(todayAvail);
+  $('bMonth').textContent = fmt(carry);
+  $('bMonthRow').className = 'brow ' + (carry < 0 ? 'debt' : (carry > 0 ? 'surplus' : ''));
+
+  /* card titles */
   $('foodTitle').textContent  = '🍽️ Food — ' + fmt(food);
   $('spendTitle').textContent = '💸 Spending — ' + fmt(spend);
   $('depTitle').textContent   = '🏦 Deposit — ' + fmt(dep);
 
+  /* month summary boxes */
   var mSpent = 0, mDep = 0;
   var dim = daysInMonth(cfg.year, cfg.month);
   for (var i = 1; i <= dim; i++) {
     var r = d[i] || {};
-    mSpent += num(r.breakfast)+num(r.lunch)+num(r.dinner)+num(r.snacks)+num(r.other)+num(r.transport);
+    mSpent += daySpent(r);
     mDep   += num(r.deposit);
   }
   $('mSpent').textContent = fmt(mSpent);
   $('mLeft').textContent  = fmt(cfg.allowance - mSpent);
   $('mDep').textContent   = fmt(mDep);
 
-  $('dailyLimit').textContent = fmt(limit);
+  $('dailyLimit').textContent = fmt(baseLimit);
   $('limitSub').textContent = 'Allowance ' + fmt(cfg.allowance) + ' · Save ' +
     fmt(cfg.savings) + ' · ' + dim + ' days → ' + fmt(cfg.allowance - cfg.savings) + ' spendable';
 }
@@ -276,6 +359,18 @@ function attachInputs(){
     el.oninput  = handler;
     el.onchange = handler;
   });
+  Object.keys(NOTES).forEach(function(nid){
+    var el = $(nid);
+    if (!el) return;
+    var handler = function(){
+      var d = load();
+      if (!d[curDay]) d[curDay] = {};
+      d[curDay][NOTES[nid]] = this.value;
+      save(d);
+    };
+    el.oninput  = handler;
+    el.onchange = handler;
+  });
 }
 
 function bindCfg(){
@@ -283,8 +378,8 @@ function bindCfg(){
   $('savings').value = cfg.savings;
   $('currency').value = cfg.currency;
 
-  $('allowance').oninput = function(){ cfg.allowance = num(this.value); updateAll(); };
-  $('savings').oninput   = function(){ cfg.savings   = num(this.value); updateAll(); };
+  $('allowance').oninput = function(){ cfg.allowance = num(this.value); buildDayPicker(); updateAll(); };
+  $('savings').oninput   = function(){ cfg.savings   = num(this.value); buildDayPicker(); updateAll(); };
 
   var curSel = $('currency');
   var applyCurrency = function(){
